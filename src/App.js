@@ -2,6 +2,7 @@ import './App.css'
 import React, { useEffect, useState } from 'react'
 import { TABLERO_VACIO } from 'src/constants'
 import { someoneWin, putFicha, printTablero, deepCopy } from './utils_pablo'
+import { move } from './utils_fede'
 
 function App() {
 	const [tablero, setTablero] = useState(deepCopy(TABLERO_VACIO)) // Tablero, empieza vacio
@@ -16,6 +17,14 @@ function App() {
 			setTurno(turno === 'T' ? 'P' : 'T')
 		}
 	}
+
+	useEffect(() => {
+		if (turno === 'P' && !winner) {
+			console.log('pensando...')
+			tirar(move(tablero, turno))
+			console.log('tirada!')
+		}
+	}, [turno])
 
 	const reset = () => {
 		setTablero(deepCopy(TABLERO_VACIO))
