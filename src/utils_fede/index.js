@@ -27,6 +27,61 @@ const evaluate = (tablero, player) => {
 	return player === 'T' ? -(base + sum) : base + sum
 }
 
+const minMax_alpha_beta = (tablero, player, maximize, alpha, beta, depth) => {
+	if (someoneWin(tablero) || depth === 0)
+		return [null, evaluate(tablero, player)]
+	let nextPlayer = maximize ? 'P' : 'T'
+	let newTab = deepCopy(tablero)
+	let move = null
+	let bestScore = maximize ? -10000000 : 10000000
+	let a = alpha
+	let b = beta
+	if (maximize) {
+		for (const col in newTab[0]) {
+			if (newTab[0][col] === '') {
+				childsVisited += 1
+				let child = putFicha(newTab, col, nextPlayer)
+				let [, score] = minMax_alpha_beta(
+					child,
+					player,
+					!maximize,
+					a,
+					b,
+					depth - 1
+				)
+				if (score > bestScore) {
+					bestScore = score
+					move = col
+				}
+				a = Math.max(a, bestScore)
+				if (a >= b) break
+			}
+		}
+	} else {
+		for (const col in newTab[0]) {
+			if (newTab[0][col] === '') {
+				childsVisited += 1
+				let child = putFicha(newTab, col, nextPlayer)
+				let [, score] = minMax_alpha_beta(
+					child,
+					player,
+					!maximize,
+					a,
+					b,
+					depth - 1
+				)
+				if (score < bestScore) {
+					bestScore = score
+					move = col
+				}
+				b = Math.min(b, bestScore)
+				if (b <= a) break
+			}
+		}
+	}
+	return [move, bestScore / 2]
+}
+
 const minMax = (tablero, player, maximize, depth) => {
 	if (someoneWin(tablero) || depth === 0)
 		return [null, evaluate(tablero, player)]
@@ -63,8 +118,17 @@ const minMax = (tablero, player, maximize, depth) => {
 }
 
 export const move = (tablero, player) => {
+	let t_ini = Date.now()
 	childsVisited = 0
-	const [move] = minMax(tablero, player, true, 6)
+	const [move, score] = minMax_alpha_beta(
+		tablero,
+		player,
+		true,
+		-10000000,
+		10000000,
+		9
+	)
+	console.log('Time: ', Date.now() - t_ini, ' move: ', move, ' score ', score)
 	console.log('childs visited: ', childsVisited)
 	return move
 }
